@@ -12,6 +12,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -23,34 +24,41 @@ import com.managerprice.racconapps.managerprice.model.Product;
 import com.managerprice.racconapps.managerprice.model.Tag;
 import com.rengwuxian.materialedittext.MaterialEditText;
 import com.rey.material.widget.Switch;
+import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
-    RecyclerView listProduct;
-    AdapterPriceList adapterPriceList;
-    LinearLayoutManager linearLayoutManager;
+    public static Bus bus = new Bus();
 
-    SwipeRefreshLayout swipeRefreshLayout;
+    private RecyclerView listProduct;
+    private AdapterPriceList adapterPriceList;
+    private LinearLayoutManager linearLayoutManager;
 
-    Switch aSwitch;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
-    List<Tag> titleClass = new ArrayList<>();
-    List<Tag> titleId = new ArrayList<>();
-    List<Tag> priceClass = new ArrayList<>();
-    List<Tag> priceId = new ArrayList<>();
+    private Switch aSwitch;
 
-    AdapterDialog adapterDialog;
+    private List<Tag> titleClass = new ArrayList<>();
+    private List<Tag> titleId = new ArrayList<>();
+    private List<Tag> priceClass = new ArrayList<>();
+    private List<Tag> priceId = new ArrayList<>();
 
+    private AdapterDialog adapterDialog;
 
-    List<String> infoProduct = new ArrayList<>();
+    private List<String> infoProduct = new ArrayList<>();
+
+    public Product product;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        bus.register(MainActivity.this);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -153,10 +161,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 if (wantToCloseDialog) {
                     if (tag.equals("priceClass")) {
                         adapterPriceList.addItem(new Product(getInfo(titleId, titleClass).get(0), getInfo(priceClass, priceId).get(0)));
-                        Toast.makeText(MainActivity.this, "" + getInfo(titleId, titleClass).get(2)+" ----- " + getInfo(priceClass, priceId).get(2), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, "" + getInfo(titleId, titleClass).get(2) + " ----- " + getInfo(priceClass, priceId).get(2), Toast.LENGTH_SHORT).show();
                         resetList(titleClass, titleId, priceClass, priceId);
                     } else {
-
                         showDialogTitle(priceClass, "Set Price", "priceClass");
                     }
 
@@ -166,7 +173,6 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             }
         });
     }
-
 
 
     Switch.OnCheckedChangeListener onCheckedChangeListener = new Switch.OnCheckedChangeListener() {
@@ -222,7 +228,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 if (tag.getIsActive() == Color.parseColor("#6816b5ff")) {
                     infoProduct.add(tag.getText());
                     infoProduct.add(tag.getId());
-                    infoProduct.add(""+tag.isClassOrID());
+                    infoProduct.add("" + tag.isClassOrID());
                 }
             }
         }
@@ -242,7 +248,23 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     }
 
 
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case 0:
+                Toast.makeText(MainActivity.this, "change", Toast.LENGTH_SHORT).show();
+                break;
+            case 1:
+                Toast.makeText(MainActivity.this, "delete" , Toast.LENGTH_SHORT).show();
+                break;
+        }
+        return super.onContextItemSelected(item);
+    }
 
+    @Subscribe
+    public void getProduct(Product product) {
+        this.product = product;
+    }
 
     //TODO  priceClass refresh
     @Override
@@ -256,4 +278,11 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             }
         }, 3000);
     }
+
+    @Override
+    protected void onDestroy() {
+        bus.unregister(MainActivity.this);
+        super.onDestroy();
+    }
+
 }
