@@ -1,4 +1,4 @@
-package com.managerprice.racconapps.managerprice.adapters;
+package com.managerprice.racconapps.app.adapters;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -9,15 +9,11 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.managerprice.racconapps.managerprice.R;
-import com.managerprice.racconapps.managerprice.model.Tag;
+import com.managerprice.racconapps.app.R;
+import com.managerprice.racconapps.app.model.Tag;
 
-import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by sanyok on 05.01.16.
- */
 public class AdapterDialog extends SelectableAdapter<AdapterDialog.ViewHolder>{
 
 

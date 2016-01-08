@@ -1,8 +1,7 @@
-package com.managerprice.racconapps.managerprice.adapters;
+package com.managerprice.racconapps.app.adapters;
 
 import android.support.v7.widget.RecyclerView;
 import android.util.SparseBooleanArray;
-import android.view.ViewGroup;
 
 import java.util.ArrayList;
 import java.util.List;

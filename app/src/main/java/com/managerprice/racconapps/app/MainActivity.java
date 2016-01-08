@@ -1,4 +1,4 @@
-package com.managerprice.racconapps.managerprice;
+package com.managerprice.racconapps.app;
 
 
 import android.content.DialogInterface;
@@ -11,29 +11,39 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.managerprice.racconapps.managerprice.adapters.AdapterDialog;
-import com.managerprice.racconapps.managerprice.adapters.AdapterPriceList;
-import com.managerprice.racconapps.managerprice.model.Product;
-import com.managerprice.racconapps.managerprice.model.Tag;
+import com.managerprice.racconapps.app.adapters.AdapterDialog;
+import com.managerprice.racconapps.app.adapters.AdapterPriceList;
+import com.managerprice.racconapps.app.api.retriever.ProductRetrieverImpl;
+import com.managerprice.racconapps.app.model.Product;
+import com.managerprice.racconapps.app.model.Tag;
+import com.managerprice.racconapps.app.task.ProductRetrievingTask;
 import com.rengwuxian.materialedittext.MaterialEditText;
 import com.rey.material.widget.Switch;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
+
+    public static final String STORE_FILE = "store.json";
+
+    public static final String URL_ROZETKA = "http://soft.rozetka.com.ua/avast_pro_4820153970342/p641415/";
 
     RecyclerView listProduct;
     AdapterPriceList adapterPriceList;
     LinearLayoutManager linearLayoutManager;
 
     SwipeRefreshLayout swipeRefreshLayout;
+
+    private ProductRetrieverImpl retriever;
 
     Switch aSwitch;
 
@@ -53,7 +63,6 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
 
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.refresh);
         swipeRefreshLayout.setOnRefreshListener(this);
@@ -87,14 +96,15 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     private void showDialogAddURL() {
         infoProduct = new ArrayList<>();
-
-        MaterialEditText materialEditText = new MaterialEditText(this);
+        final File storeFile = new File(getApplicationContext().getExternalFilesDir(null).getAbsolutePath() + STORE_FILE);
+        final MaterialEditText materialEditText = new MaterialEditText(this);
         materialEditText.setHint("URL");
         materialEditText.setFloatingLabel(MaterialEditText.FLOATING_LABEL_HIGHLIGHT);
         materialEditText.setPrimaryColor(Color.parseColor("#2196F3"));
         materialEditText.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        materialEditText.setText(URL_ROZETKA);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Set address URL");
 
         builder.setView(getLinerLayout(materialEditText));
@@ -102,8 +112,12 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                if (true) {
+                if (true) { // WTF???
+                    retriever = new ProductRetrieverImpl(materialEditText.getText().toString());
+                    ProductRetrievingTask task = new ProductRetrievingTask(builder.getContext(), retriever);
+                    task.execute();
                     showDialogTitle(titleClass, "Set title", "titleClass");
+                    Log.d("Madness", retriever.getUrl());
                 } else {
                     Toast.makeText(MainActivity.this, "", Toast.LENGTH_SHORT).show();
                 }

@@ -1,4 +1,4 @@
-package com.managerprice.racconapps.managerprice;
+package com.managerprice.racconapps.app;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

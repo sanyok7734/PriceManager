@@ -1,4 +1,4 @@
-package com.managerprice.racconapps.managerprice.model;
+package com.managerprice.racconapps.app.model;
 
 /**
  * Created by sanyok on 03.01.16.

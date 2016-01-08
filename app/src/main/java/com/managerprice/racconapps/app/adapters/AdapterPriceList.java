@@ -1,4 +1,4 @@
-package com.managerprice.racconapps.managerprice.adapters;
+package com.managerprice.racconapps.app.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -7,8 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.managerprice.racconapps.managerprice.R;
-import com.managerprice.racconapps.managerprice.model.Product;
+import com.managerprice.racconapps.app.R;
+import com.managerprice.racconapps.app.model.Product;
 
 import java.util.List;
 
