@@ -11,7 +11,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,6 +20,7 @@ import android.widget.Toast;
 
 import com.managerprice.racconapps.app.adapters.AdapterDialog;
 import com.managerprice.racconapps.app.adapters.AdapterPriceList;
+import com.managerprice.racconapps.app.api.model.Selector;
 import com.managerprice.racconapps.app.api.retriever.ProductRetrieverImpl;
 import com.managerprice.racconapps.app.model.Product;
 import com.managerprice.racconapps.app.model.Tag;
@@ -30,12 +30,13 @@ import com.rey.material.widget.Switch;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
+    public static final String TAG = "MADNESS";
     public static Bus bus = new Bus();
 
     public static final String STORE_FILE = "store.json";
@@ -50,6 +51,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     private ProductRetrieverImpl retriever;
 
     private Switch aSwitch;
+
+    private ProductRetrievingTask mainTask;
 
     private List<Tag> titleClass = new ArrayList<>();
     private List<Tag> titleId = new ArrayList<>();
@@ -92,18 +95,10 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 showDialogAddURL();
             }
         });
-
-        for (int i = 0; i < 10; i++) {
-            titleClass.add(new Tag("id" + i, "olollo" + i, false));
-            titleId.add(new Tag("olo" + i, "bla-bla" + i, true));
-            priceClass.add(new Tag("-" + i, "bla-" + i, false));
-            priceId.add(new Tag("*" + i, "bla+" + i, true));
-        }
     }
 
     private void showDialogAddURL() {
         infoProduct = new ArrayList<>();
-        final File storeFile = new File(getApplicationContext().getExternalFilesDir(null).getAbsolutePath() + STORE_FILE);
         final MaterialEditText materialEditText = new MaterialEditText(this);
         materialEditText.setHint("URL");
         materialEditText.setFloatingLabel(MaterialEditText.FLOATING_LABEL_HIGHLIGHT);
@@ -119,21 +114,39 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                if (true) { // WTF???
-                    retriever = new ProductRetrieverImpl(materialEditText.getText().toString());
-                    ProductRetrievingTask task = new ProductRetrievingTask(builder.getContext(), retriever);
-                    task.execute();
-                    showDialogTitle(titleClass, "Set title", "titleClass");
-                    Log.d("Madness", retriever.getUrl());
-                } else {
-                    Toast.makeText(MainActivity.this, "", Toast.LENGTH_SHORT).show();
-                }
+                retriever = new ProductRetrieverImpl(materialEditText.getText().toString());
+                mainTask = new ProductRetrievingTask(MainActivity.this, retriever);
+                mainTask.execute();
             }
         });
 
         builder.setNegativeButton("CANCEL", null);
 
         builder.show();
+    }
+
+    @Subscribe
+    public void startDialog(Boolean value) {
+        ProductRetrieverImpl retriever = mainTask.getRetriever();
+        Map<String, String> mapClass = retriever.getBySelector(Selector.CLASS);
+
+        Map<String, String> mapId = retriever.getBySelector(Selector.ID);
+        titleClass = new ArrayList<>();
+        titleId = new ArrayList<>();
+        priceClass = new ArrayList<>();
+        priceId = new ArrayList<>();
+
+        for (Map.Entry<String, String> entry : mapClass.entrySet()) {
+            titleClass.add(new Tag(entry.getKey(), entry.getValue(), false));
+            priceClass.add(new Tag(entry.getKey(), entry.getValue(), false));
+        }
+
+        for (Map.Entry<String, String> entry : mapId.entrySet()) {
+            titleId.add(new Tag(entry.getKey(), entry.getValue(), false));
+            priceId.add(new Tag(entry.getKey(), entry.getValue(), false));
+        }
+
+        showDialogTitle(titleClass, "Set title", "titleClass");
     }
 
     private void showDialogTitle(List<Tag> tags, String name, final String tag) {
@@ -173,6 +186,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
                 if (wantToCloseDialog) {
                     if (tag.equals("priceClass")) {
+                        // TODO adapterPriceList заполнять с json
                         adapterPriceList.addItem(new Product(getInfo(titleId, titleClass).get(0), getInfo(priceClass, priceId).get(0)));
                         Toast.makeText(MainActivity.this, "" + getInfo(titleId, titleClass).get(2) + " ----- " + getInfo(priceClass, priceId).get(2), Toast.LENGTH_SHORT).show();
                         resetList(titleClass, titleId, priceClass, priceId);
@@ -268,7 +282,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 Toast.makeText(MainActivity.this, "change", Toast.LENGTH_SHORT).show();
                 break;
             case 1:
-                Toast.makeText(MainActivity.this, "delete" , Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "delete", Toast.LENGTH_SHORT).show();
                 break;
         }
         return super.onContextItemSelected(item);
