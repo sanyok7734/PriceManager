@@ -1,4 +1,4 @@
-package com.managerprice.racconapps.managerprice;
+package com.managerprice.racconapps.app;
 
 import org.junit.Test;
 
