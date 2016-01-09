@@ -166,10 +166,13 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                retriever = new ProductRetrieverImpl(materialEditText.getText().toString());
+                currentUrl = materialEditText.getText().toString();
+                if (!currentUrl.startsWith("http://")) {
+                    currentUrl = "https://" + currentUrl;
+                }
+                retriever = new ProductRetrieverImpl(currentUrl);
                 mainTask = new ProductRetrievingTask(MainActivity.this, retriever);
                 mainTask.execute();
-                currentUrl = materialEditText.getText().toString();
             }
         });
 
