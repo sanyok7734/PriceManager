@@ -377,6 +377,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         adapterPriceList = new AdapterPriceList(items, getApplicationContext());
         swipeRefreshLayout.setRefreshing(false);
         adapterPriceList.notifyDataSetChanged();
+        ProductStorageJsonImpl productStorage = new ProductStorageJsonImpl(productsFile);
+        productStorage.updateItemsList(items);
+        SimpleOperations.INSTANCE.writeJSONToFile(productStorage.getProductsJSON().toString(), productsFile);
         listProduct.setAdapter(adapterPriceList);
     }
 

@@ -6,7 +6,7 @@ android {
     buildToolsVersion "23.0.2"
 
     defaultConfig {
-        applicationId "com.managerprice.racconapps.managerprice"
+        applicationId "com.racconapps.managerprice"
         minSdkVersion 15
         targetSdkVersion 23
         versionCode 1
