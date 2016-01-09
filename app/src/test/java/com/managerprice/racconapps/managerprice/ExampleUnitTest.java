@@ -1,4 +1,4 @@
-package com.managerprice.racconapps.app;
+package com.raccoonapps.pricemanager.app;
 
 import org.junit.Test;
 
