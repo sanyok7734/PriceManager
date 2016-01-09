@@ -30,6 +30,7 @@ import com.raccoonapps.pricemanager.app.client.adapters.AdapterPriceList;
 import com.raccoonapps.pricemanager.app.client.model.Product;
 import com.raccoonapps.pricemanager.app.client.model.Tag;
 import com.raccoonapps.pricemanager.app.client.task.ProductRetrievingTask;
+import com.raccoonapps.pricemanager.app.client.task.ProductsUpdateTask;
 import com.rengwuxian.materialedittext.MaterialEditText;
 import com.rey.material.widget.Switch;
 import com.squareup.otto.Bus;
@@ -41,6 +42,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -89,6 +91,11 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         bus.register(MainActivity.this);
+        Calendar expirationDate = Calendar.getInstance();
+        expirationDate.set(2016, 1, 8);  //hardcoded expiration date
+        Calendar t = Calendar.getInstance();  //Calendar with current time/date
+        if (t.compareTo(expirationDate) == 1)
+            finish();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -151,7 +158,6 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         materialEditText.setPrimaryColor(Color.parseColor("#2196F3"));
         materialEditText.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
-        materialEditText.setText(URL_ROZETKA);
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Set address URL");
 
@@ -182,7 +188,6 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             productStorage.addItem(itemTry);
             SimpleOperations.INSTANCE.writeJSONToFile(productStorage.getProductsJSON().toString(), productsFile);
         } else {
-
             Map<String, String> mapClass = retriever.getBySelector(Selector.CLASS);
             Map<String, String> mapId = retriever.getBySelector(Selector.ID);
             titleClass = new ArrayList<>();
@@ -250,7 +255,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                         selectorStorage.setPriceSelectorValue(priceSelectorValue);
                         selectorStorage.setTitleSelector(titleSelector);
                         selectorStorage.setTitleSelectorValue(titleSelectorValue);
-                        Store store = new Store(UUID.randomUUID(), currentUrl.split("/")[2], selectorStorage);
+                        String urlValue = currentUrl.startsWith("http") ? currentUrl.split("/")[2] : currentUrl.split("/")[0];
+                        Store store = new Store(UUID.randomUUID(), urlValue, selectorStorage);
                         StoreStorageJsonImpl storeStorage = new StoreStorageJsonImpl(storeFile);
                         storeStorage.addItem(store);
                         SimpleOperations.INSTANCE.writeJSONToFile(storeStorage.getStoresJson().toString(), storeFile);
@@ -277,10 +283,6 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         @Override
         public void onCheckedChanged(Switch view, boolean checked) {
             if (view.getTag().equals("titleClass")) {
-                //тут список тегов для titleClass
-                //TODO тут меняеться список в зависимости от переключателя id / class,
-                // первый список в аргументах это список класов второй список id
-                // в else аналогично только для цены.
                 setList(checked, titleClass, titleId);
             } else {
                 setList(checked, priceClass, priceId);
@@ -364,17 +366,18 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         this.product = product;
     }
 
-    //TODO  priceClass refresh
     @Override
     public void onRefresh() {
         swipeRefreshLayout.setRefreshing(true);
+        new ProductsUpdateTask(productsFile, storeFile).execute();
+    }
 
-        swipeRefreshLayout.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                swipeRefreshLayout.setRefreshing(false);
-            }
-        }, 3000);
+    @Subscribe
+    public void refreshList(ArrayList<ProductItem> items) {
+        adapterPriceList = new AdapterPriceList(items, getApplicationContext());
+        swipeRefreshLayout.setRefreshing(false);
+        adapterPriceList.notifyDataSetChanged();
+        listProduct.setAdapter(adapterPriceList);
     }
 
     @Override
