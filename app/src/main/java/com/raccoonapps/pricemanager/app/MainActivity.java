@@ -20,8 +20,11 @@ import android.widget.Toast;
 
 import com.raccoonapps.pricemanager.app.api.model.ProductItem;
 import com.raccoonapps.pricemanager.app.api.model.Selector;
+import com.raccoonapps.pricemanager.app.api.model.Store;
 import com.raccoonapps.pricemanager.app.api.retriever.ProductRetrieverImpl;
 import com.raccoonapps.pricemanager.app.api.storage.ProductStorageJsonImpl;
+import com.raccoonapps.pricemanager.app.api.storage.SelectorStorage;
+import com.raccoonapps.pricemanager.app.api.storage.StoreStorageJsonImpl;
 import com.raccoonapps.pricemanager.app.client.adapters.AdapterDialog;
 import com.raccoonapps.pricemanager.app.client.adapters.AdapterPriceList;
 import com.raccoonapps.pricemanager.app.client.model.Product;
@@ -51,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     public static final String STORE_FILE = "store.json";
     public static final String PRODUCTS_FILE = "products.json";
-    public static final String URL_ROZETKA = "http://soft.rozetka.com.ua/avast_pro_4820153970342/p641415/";
+    public static final String URL_ROZETKA = "http://soft.rozetka.com.ua/cod_black_ops_3_ps3/p3921461/";
 
     private RecyclerView listProduct;
     private AdapterPriceList adapterPriceList;
@@ -172,23 +175,32 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     @Subscribe
     public void startDialog(Boolean value) {
         ProductRetrieverImpl retriever = mainTask.getRetriever();
-        Map<String, String> mapClass = retriever.getBySelector(Selector.CLASS);
-        Map<String, String> mapId = retriever.getBySelector(Selector.ID);
-        titleClass = new ArrayList<>();
-        titleId = new ArrayList<>();
-        priceClass = new ArrayList<>();
-        priceId = new ArrayList<>();
+        ProductItem itemTry = retriever.tryRetrieveExistingValues(storeFile);
+        if (itemTry != null) {
+            ProductStorageJsonImpl productStorage = new ProductStorageJsonImpl(productsFile);
+            adapterPriceList.addItem(itemTry);
+            productStorage.addItem(itemTry);
+            SimpleOperations.INSTANCE.writeJSONToFile(productStorage.getProductsJSON().toString(), productsFile);
+        } else {
 
-        fillLists(titleClass, priceClass, mapClass);
-        fillLists(titleId, priceId, mapId);
+            Map<String, String> mapClass = retriever.getBySelector(Selector.CLASS);
+            Map<String, String> mapId = retriever.getBySelector(Selector.ID);
+            titleClass = new ArrayList<>();
+            titleId = new ArrayList<>();
+            priceClass = new ArrayList<>();
+            priceId = new ArrayList<>();
 
-        showDialogTitle(titleClass, "Set title", "titleClass");
+            fillLists(titleClass, priceClass, mapClass, false);
+            fillLists(titleId, priceId, mapId, true);
+
+            showDialogTitle(titleClass, "Set title", "titleClass");
+        }
     }
 
-    private void fillLists(List<Tag> list1, List<Tag> list2, Map<String, String> map) {
+    private void fillLists(List<Tag> list1, List<Tag> list2, Map<String, String> map, boolean cond) {
         for (Map.Entry<String, String> entry : map.entrySet()) {
-            list1.add(new Tag(entry.getKey(), entry.getValue(), false));
-            list2.add(new Tag(entry.getKey(), entry.getValue(), false));
+            list1.add(new Tag(entry.getKey(), entry.getValue(), cond));
+            list2.add(new Tag(entry.getKey(), entry.getValue(), cond));
         }
     }
 
@@ -229,8 +241,20 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
                 if (wantToCloseDialog) {
                     if (tag.equals("priceClass")) {
-                        UUID storeID = UUID.randomUUID(); // TODO change later
-                        ProductItem productItem = new ProductItem(UUID.randomUUID(), storeID, getInfo(titleId, titleClass).get(0), getInfo(priceClass, priceId).get(0), currentUrl, LocalDateTime.now());
+                        String priceSelector = getInfo(priceId, priceClass).get(2);
+                        String priceSelectorValue = getInfo(priceId, priceClass).get(1);
+                        String titleSelector = getInfo(titleId, titleClass).get(2);
+                        String titleSelectorValue = getInfo(titleId, titleClass).get(1);
+                        SelectorStorage selectorStorage = new SelectorStorage();
+                        selectorStorage.setPriceSelector(priceSelector);
+                        selectorStorage.setPriceSelectorValue(priceSelectorValue);
+                        selectorStorage.setTitleSelector(titleSelector);
+                        selectorStorage.setTitleSelectorValue(titleSelectorValue);
+                        Store store = new Store(UUID.randomUUID(), currentUrl.split("/")[2], selectorStorage);
+                        StoreStorageJsonImpl storeStorage = new StoreStorageJsonImpl(storeFile);
+                        storeStorage.addItem(store);
+                        SimpleOperations.INSTANCE.writeJSONToFile(storeStorage.getStoresJson().toString(), storeFile);
+                        ProductItem productItem = new ProductItem(UUID.randomUUID(), store.getId(), getInfo(titleId, titleClass).get(0), getInfo(priceClass, priceId).get(0), currentUrl, LocalDateTime.now());
                         adapterPriceList.addItem(productItem);
                         //Toast.makeText(MainActivity.this, "" + getInfo(titleId, titleClass).get(2) + " ----- " + getInfo(priceClass, priceId).get(2), Toast.LENGTH_SHORT).show();
                         ProductStorageJsonImpl productStorage = new ProductStorageJsonImpl(productsFile);
@@ -302,7 +326,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 if (tag.getIsActive() == Color.parseColor("#6816b5ff")) {
                     infoProduct.add(tag.getText());
                     infoProduct.add(tag.getId());
-                    infoProduct.add("" + tag.isClassOrID());
+                    infoProduct.add(tag.isClassOrID() ? Selector.ID.getSelectorType() : Selector.CLASS.getSelectorType());
                 }
             }
         }
