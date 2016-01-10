@@ -9,9 +9,9 @@ import java.util.*
 object SimpleOperations {
 
     fun getItemIndex(id: UUID, array: JSONArray): Int {
-        for (itemIndex in 0..array.length()) {
+        for (itemIndex in 0..array.length() - 1) {
             val currentItem = array.get(itemIndex) as JSONObject
-            if (currentItem.getString(JSONProductFields.ID.value).equals(id))
+            if (currentItem.getString(JSONProductFields.ID.value).equals(id.toString()))
                 return itemIndex
         }
         return -1

@@ -28,7 +28,6 @@ import com.raccoonapps.pricemanager.app.api.storage.SelectorStorage;
 import com.raccoonapps.pricemanager.app.api.storage.StoreStorageJsonImpl;
 import com.raccoonapps.pricemanager.app.client.adapters.AdapterDialog;
 import com.raccoonapps.pricemanager.app.client.adapters.AdapterPriceList;
-import com.raccoonapps.pricemanager.app.client.model.Product;
 import com.raccoonapps.pricemanager.app.client.model.Tag;
 import com.raccoonapps.pricemanager.app.client.task.ProductRetrievingTask;
 import com.raccoonapps.pricemanager.app.client.task.ProductsUpdateTask;
@@ -85,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     private List<String> infoProduct = new ArrayList<>();
 
-    public Product product;
+    public ProductItem product;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -359,14 +358,20 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 Toast.makeText(MainActivity.this, "change", Toast.LENGTH_SHORT).show();
                 break;
             case 1:
-                Toast.makeText(MainActivity.this, "delete", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Delete product " + product.getTitle(), Toast.LENGTH_SHORT).show();
+                ProductStorageJsonImpl productStorage = new ProductStorageJsonImpl(productsFile);
+                productStorage.deleteItem(product.getId());
+                adapterPriceList = new AdapterPriceList(productStorage.getItemsList(), getApplicationContext());
+                adapterPriceList.notifyDataSetChanged();
+                listProduct.setAdapter(adapterPriceList);
+                SimpleOperations.INSTANCE.writeJSONToFile(productStorage.getProductsJSON().toString(), productsFile);
                 break;
         }
         return super.onContextItemSelected(item);
     }
 
     @Subscribe
-    public void getProduct(Product product) {
+    public void getProduct(ProductItem product) {
         this.product = product;
     }
 
