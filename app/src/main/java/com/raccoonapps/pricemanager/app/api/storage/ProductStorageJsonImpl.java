@@ -125,7 +125,10 @@ public class ProductStorageJsonImpl implements Storage<ProductItem> {
     public void updateItemsList(List<ProductItem> newProducts) {
         try {
             productsJSON.remove(PRODUCTS_ARRAY);
-            productsJSON.put(PRODUCTS_ARRAY, newProducts);
+            JSONArray array = new JSONArray();
+            for (ProductItem item : newProducts)
+                array.put(item.toJSONObject());
+            productsJSON.put(PRODUCTS_ARRAY, array);
         } catch (Exception e) {
             e.printStackTrace();
         }

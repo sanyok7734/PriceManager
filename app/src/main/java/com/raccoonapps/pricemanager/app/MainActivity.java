@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -168,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             public void onClick(DialogInterface dialog, int which) {
                 currentUrl = materialEditText.getText().toString();
                 if (!currentUrl.startsWith("http://")) {
-                    currentUrl = "https://" + currentUrl;
+                    currentUrl = "http://" + currentUrl;
                 }
                 retriever = new ProductRetrieverImpl(currentUrl);
                 mainTask = new ProductRetrievingTask(MainActivity.this, retriever);
@@ -258,7 +259,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                         selectorStorage.setPriceSelectorValue(priceSelectorValue);
                         selectorStorage.setTitleSelector(titleSelector);
                         selectorStorage.setTitleSelectorValue(titleSelectorValue);
-                        String urlValue = currentUrl.startsWith("http") ? currentUrl.split("/")[2] : currentUrl.split("/")[0];
+                        String urlValue = currentUrl.split("/")[2];
                         Store store = new Store(UUID.randomUUID(), urlValue, selectorStorage);
                         StoreStorageJsonImpl storeStorage = new StoreStorageJsonImpl(storeFile);
                         storeStorage.addItem(store);
@@ -377,6 +378,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     @Subscribe
     public void refreshList(ArrayList<ProductItem> items) {
+        Log.d("Madness", "Items size: " + items.size());
         adapterPriceList = new AdapterPriceList(items, getApplicationContext());
         swipeRefreshLayout.setRefreshing(false);
         adapterPriceList.notifyDataSetChanged();
