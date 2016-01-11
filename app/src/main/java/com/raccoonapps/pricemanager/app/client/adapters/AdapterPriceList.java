@@ -38,6 +38,13 @@ public class AdapterPriceList extends RecyclerView.Adapter<AdapterPriceList.View
         holder.title.setText(product.getTitle());
         holder.price.setText(product.getPrice());
 
+        holder.item.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity.bus.post(product.getId());
+            }
+        });
+
         holder.item.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
@@ -58,6 +65,7 @@ public class AdapterPriceList extends RecyclerView.Adapter<AdapterPriceList.View
         notifyDataSetChanged();
     }
 
+    @SuppressWarnings("all")
     class ViewHolder extends RecyclerView.ViewHolder {
 
         TextView title;

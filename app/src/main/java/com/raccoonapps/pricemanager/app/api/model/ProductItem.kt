@@ -1,6 +1,5 @@
-package model
+package com.raccoonapps.pricemanager.app.api.model
 
-import com.raccoonapps.pricemanager.app.api.model.JSONProductFields
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -20,11 +19,4 @@ object SimpleOperations {
     fun loadJSONFromFile(productsFile: File) = productsFile.readLines().joinToString("\n")
 
     fun writeJSONToFile(json: String, destination: File) = destination.writeText(json);
-}
-
-fun JSONArray.delete(position: Int) {
-    val array = JSONArray()
-    for (index in 0..length())
-        if (index != position)
-            array.put(get(index))
 }

@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import model.SimpleOperations;
+import com.raccoonapps.pricemanager.app.api.model.SimpleOperations;
 
 public class StoreStorageJsonImpl implements Storage<Store> {
 

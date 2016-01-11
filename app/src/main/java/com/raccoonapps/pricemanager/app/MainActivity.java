@@ -2,7 +2,9 @@ package com.raccoonapps.pricemanager.app;
 
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -21,6 +23,7 @@ import android.widget.Toast;
 
 import com.raccoonapps.pricemanager.app.api.model.ProductItem;
 import com.raccoonapps.pricemanager.app.api.model.Selector;
+import com.raccoonapps.pricemanager.app.api.model.SimpleOperations;
 import com.raccoonapps.pricemanager.app.api.model.Store;
 import com.raccoonapps.pricemanager.app.api.retriever.ProductRetrieverImpl;
 import com.raccoonapps.pricemanager.app.api.storage.ProductStorageJsonImpl;
@@ -42,12 +45,9 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import model.SimpleOperations;
 
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
@@ -91,11 +91,6 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         bus.register(MainActivity.this);
-        Calendar expirationDate = Calendar.getInstance();
-        expirationDate.set(2016, 1, 8);  //hardcoded expiration date
-        Calendar t = Calendar.getInstance();  //Calendar with current time/date
-        if (t.compareTo(expirationDate) == 1)
-            finish();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -104,7 +99,6 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         List<ProductItem> loadedList = loadProductsListFromJSON();
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.refresh);
         swipeRefreshLayout.setOnRefreshListener(this);
-        // делаем повеселее
         swipeRefreshLayout.setColorSchemeResources(R.color.blue, R.color.green, R.color.yellow, R.color.red);
 
 
@@ -239,7 +233,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Boolean wantToCloseDialog = false;
+                Boolean wantToCloseDialog;
 
                 if (tag.equals("priceClass")) {
                     wantToCloseDialog = getActive(priceId, priceClass);
@@ -361,18 +355,35 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 Toast.makeText(MainActivity.this, "Delete product " + product.getTitle(), Toast.LENGTH_SHORT).show();
                 ProductStorageJsonImpl productStorage = new ProductStorageJsonImpl(productsFile);
                 productStorage.deleteItem(product.getId());
-                adapterPriceList = new AdapterPriceList(productStorage.getItemsList(), getApplicationContext());
-                adapterPriceList.notifyDataSetChanged();
-                listProduct.setAdapter(adapterPriceList);
+                updatePriceListAdapter(productStorage.getItemsList());
                 SimpleOperations.INSTANCE.writeJSONToFile(productStorage.getProductsJSON().toString(), productsFile);
                 break;
         }
         return super.onContextItemSelected(item);
     }
 
+    private void updatePriceListAdapter(List<ProductItem> products) {
+        adapterPriceList = new AdapterPriceList(products, getApplicationContext());
+        adapterPriceList.notifyDataSetChanged();
+        listProduct.setAdapter(adapterPriceList);
+    }
+
     @Subscribe
     public void getProduct(ProductItem product) {
         this.product = product;
+    }
+
+    @Subscribe
+    public void getSelectedItemUUID(UUID uuid) {
+        openInBrowser(uuid);
+    }
+
+
+    private void openInBrowser(UUID uuid) {
+        ProductStorageJsonImpl productStorage = new ProductStorageJsonImpl(productsFile);
+        ProductItem product = productStorage.get(uuid);
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(product.getLink()));
+        startActivity(browserIntent);
     }
 
     @Override
@@ -384,13 +395,11 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     @Subscribe
     public void refreshList(ArrayList<ProductItem> items) {
         Log.d("Madness", "Items size: " + items.size());
-        adapterPriceList = new AdapterPriceList(items, getApplicationContext());
-        swipeRefreshLayout.setRefreshing(false);
-        adapterPriceList.notifyDataSetChanged();
         ProductStorageJsonImpl productStorage = new ProductStorageJsonImpl(productsFile);
         productStorage.updateItemsList(items);
         SimpleOperations.INSTANCE.writeJSONToFile(productStorage.getProductsJSON().toString(), productsFile);
-        listProduct.setAdapter(adapterPriceList);
+        updatePriceListAdapter(items);
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     @Override
