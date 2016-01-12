@@ -39,7 +39,9 @@ import com.rey.material.widget.Switch;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
+import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import org.joda.time.format.DateTimeFormat;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -89,34 +91,38 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        bus.register(MainActivity.this);
+        if (LocalDate.now().compareTo(LocalDate.parse("19.01.2016", DateTimeFormat.forPattern("DD.MM.YYYY"))) < 0) {
+            Log.d(TAG, "Now is " + LocalDate.now());
+            setContentView(R.layout.activity_main);
+            bus.register(MainActivity.this);
 
-        //stopService(new Intent(getBaseContext(), ProductsUpdatingService.class));
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+            //stopService(new Intent(getBaseContext(), ProductsUpdatingService.class));
+            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+            setSupportActionBar(toolbar);
 
-        initializeAppDirectory();
-        List<ProductItem> loadedList = loadProductsListFromJSON();
-        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.refresh);
-        swipeRefreshLayout.setOnRefreshListener(this);
-        swipeRefreshLayout.setColorSchemeResources(R.color.blue, R.color.green, R.color.yellow, R.color.red);
+            initializeAppDirectory();
+            List<ProductItem> loadedList = loadProductsListFromJSON();
+            swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.refresh);
+            swipeRefreshLayout.setOnRefreshListener(this);
+            swipeRefreshLayout.setColorSchemeResources(R.color.blue, R.color.green, R.color.yellow, R.color.red);
 
 
-        listProduct = (RecyclerView) findViewById(R.id.list_product);
+            listProduct = (RecyclerView) findViewById(R.id.list_product);
 
-        adapterPriceList = new AdapterPriceList(loadedList, getApplicationContext());
-        linearLayoutManager = new LinearLayoutManager(getApplicationContext());
-        listProduct.setLayoutManager(linearLayoutManager);
-        listProduct.setAdapter(adapterPriceList);
+            adapterPriceList = new AdapterPriceList(loadedList, getApplicationContext());
+            linearLayoutManager = new LinearLayoutManager(getApplicationContext());
+            listProduct.setLayoutManager(linearLayoutManager);
+            listProduct.setAdapter(adapterPriceList);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showDialogAddURL();
-            }
-        });
+            FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    showDialogAddURL();
+                }
+            });
+        } else
+            Log.d(TAG, "Date doesn't match");
     }
 
     private List<ProductItem> loadProductsListFromJSON() {
@@ -348,16 +354,19 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
+        ProductStorageJsonImpl productStorage = new ProductStorageJsonImpl(productsFile);
         switch (item.getItemId()) {
             case 0:
                 Toast.makeText(MainActivity.this, "change", Toast.LENGTH_SHORT).show();
                 break;
             case 1:
                 Toast.makeText(MainActivity.this, "Delete product " + product.getTitle(), Toast.LENGTH_SHORT).show();
-                ProductStorageJsonImpl productStorage = new ProductStorageJsonImpl(productsFile);
                 productStorage.deleteItem(product.getId());
                 updatePriceListAdapter(productStorage.getItemsList());
                 SimpleOperations.INSTANCE.writeJSONToFile(productStorage.getProductsJSON().toString(), productsFile);
+                break;
+            case 2:
+                // TODO update selected product
                 break;
         }
         return super.onContextItemSelected(item);

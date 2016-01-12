@@ -85,6 +85,7 @@ public class AdapterPriceList extends RecyclerView.Adapter<AdapterPriceList.View
             public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
                 menu.add(0, 0, 0, "Change");
                 menu.add(0, 1, 0, "Delete");
+                menu.add(0, 2, 0, "Update");
             }
         };
     }
