@@ -1,5 +1,7 @@
 package com.raccoonapps.pricemanager.app.api.model
 
+import android.content.Context
+import android.net.ConnectivityManager
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -19,4 +21,10 @@ object SimpleOperations {
     fun loadJSONFromFile(productsFile: File) = productsFile.readLines().joinToString("\n")
 
     fun writeJSONToFile(json: String, destination: File) = destination.writeText(json);
+
+    fun isNetworkAvailable(context: Context): Boolean {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkInfo = connectivityManager.activeNetworkInfo
+        return networkInfo.isAvailable && networkInfo.type == ConnectivityManager.TYPE_WIFI;
+    }
 }

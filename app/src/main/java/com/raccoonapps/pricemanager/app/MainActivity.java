@@ -92,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         setContentView(R.layout.activity_main);
         bus.register(MainActivity.this);
 
+        //stopService(new Intent(getBaseContext(), ProductsUpdatingService.class));
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -380,31 +381,49 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
 
     private void openInBrowser(UUID uuid) {
-        ProductStorageJsonImpl productStorage = new ProductStorageJsonImpl(productsFile);
-        ProductItem product = productStorage.get(uuid);
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(product.getLink()));
-        startActivity(browserIntent);
+        ProductItem product = new ProductStorageJsonImpl(productsFile).get(uuid);
+        if (product != null) {
+            Log.d(TAG, "Selected product: " + product.getTitle());
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(product.getLink())));
+        }
+        else
+            Log.d(TAG, "Selected null product " + uuid);
     }
 
     @Override
     public void onRefresh() {
-        swipeRefreshLayout.setRefreshing(true);
-        new ProductsUpdateTask(productsFile, storeFile).execute();
+        if (SimpleOperations.INSTANCE.isNetworkAvailable(getApplicationContext())) {
+            swipeRefreshLayout.setRefreshing(true);
+            new ProductsUpdateTask(productsFile, storeFile, getApplicationContext()).execute();
+        } else {
+            swipeRefreshLayout.setRefreshing(false);
+            Toast.makeText(MainActivity.this, "No WiFi connection available", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Subscribe
     public void refreshList(ArrayList<ProductItem> items) {
-        Log.d("Madness", "Items size: " + items.size());
-        ProductStorageJsonImpl productStorage = new ProductStorageJsonImpl(productsFile);
-        productStorage.updateItemsList(items);
-        SimpleOperations.INSTANCE.writeJSONToFile(productStorage.getProductsJSON().toString(), productsFile);
-        updatePriceListAdapter(items);
         swipeRefreshLayout.setRefreshing(false);
+        if (!items.isEmpty()) {
+            ProductStorageJsonImpl productStorage = new ProductStorageJsonImpl(productsFile);
+            productStorage.updateItemsList(items);
+            SimpleOperations.INSTANCE.writeJSONToFile(productStorage.getProductsJSON().toString(), productsFile);
+            updatePriceListAdapter(items);
+        } else {
+            Toast.makeText(MainActivity.this, "Error occurred while updating", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        //startService(new Intent(getBaseContext(), ProductsUpdatingService.class));
+        super.onPause();
     }
 
     @Override
     protected void onDestroy() {
         bus.unregister(MainActivity.this);
+        //startService(new Intent(getBaseContext(), ProductsUpdatingService.class));
         super.onDestroy();
     }
 

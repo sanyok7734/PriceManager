@@ -1,9 +1,8 @@
 package com.raccoonapps.pricemanager.app.api.storage;
 
-import android.util.Log;
-
 import com.raccoonapps.pricemanager.app.api.model.JSONProductFields;
 import com.raccoonapps.pricemanager.app.api.model.ProductItem;
+import com.raccoonapps.pricemanager.app.api.model.SimpleOperations;
 
 import org.joda.time.LocalDateTime;
 import org.json.JSONArray;
@@ -13,8 +12,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import com.raccoonapps.pricemanager.app.api.model.SimpleOperations;
 
 public class ProductStorageJsonImpl implements Storage<ProductItem> {
 
@@ -103,7 +100,6 @@ public class ProductStorageJsonImpl implements Storage<ProductItem> {
             JSONArray products = (JSONArray) productsJSON.get("products");
             ArrayList<ProductItem> collector = new ArrayList<>();
             if (products != null) {
-                Log.d("Madness", "Products length: " + products.length());
                 for (int i = 0; i < products.length(); i++) {
                     JSONObject currentObject = (JSONObject) products.get(i);
                     String id = currentObject.getString(JSONProductFields.ID.getValue());
@@ -124,6 +120,10 @@ public class ProductStorageJsonImpl implements Storage<ProductItem> {
 
     public void updateItemsList(List<ProductItem> newProducts) {
         try {
+            List<ProductItem> items = getItemsList();
+            for (int i = 0; i < newProducts.size(); i++) {
+                newProducts.get(i).setId(items.get(i).getId());
+            }
             productsJSON.remove(PRODUCTS_ARRAY);
             JSONArray array = new JSONArray();
             for (ProductItem item : newProducts)
