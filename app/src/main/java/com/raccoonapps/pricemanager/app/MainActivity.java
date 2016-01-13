@@ -358,9 +358,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     public boolean onContextItemSelected(MenuItem item) {
         ProductStorageJsonImpl productStorage = new ProductStorageJsonImpl(productsFile);
         switch (item.getItemId()) {
-            case 0:
-                Toast.makeText(MainActivity.this, "Change", Toast.LENGTH_SHORT).show();
-                break;
+           /* case 0:
+                Toast.makeText(MainActivity.this, "change", Toast.LENGTH_SHORT).show();
+                break;*/
             case 1:
                 Toast.makeText(MainActivity.this, "Delete product " + product.getTitle(), Toast.LENGTH_SHORT).show();
                 productStorage.deleteItem(product.getId());
