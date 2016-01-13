@@ -1,5 +1,6 @@
 package com.raccoonapps.pricemanager.app.client.task;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -18,16 +19,33 @@ public class ProductsUpdateTask extends AsyncTask<Void, Void, Void> {
 
     private List<ProductItem> products;
 
+    private ProgressDialog progressDialog;
+
     private File storesFile;
     private ArrayList<ProductItem> resultList;
     private Context context;
     private boolean isCompleteSuccessfully = true;
+    private boolean blockUI;
 
-    public ProductsUpdateTask(List<ProductItem> itemsForUpdate, File productsFile, File storesFile, Context context) {
+    public ProductsUpdateTask(List<ProductItem> itemsForUpdate, File productsFile, File storesFile, boolean blockUI, Context context) {
         ProductStorageJsonImpl productStorage = new ProductStorageJsonImpl(productsFile);
         this.products = itemsForUpdate == null ? productStorage.getItemsList() : itemsForUpdate;
         this.storesFile = storesFile;
         this.context = context;
+        this.blockUI = blockUI;
+    }
+
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        if (blockUI) {
+            if (progressDialog != null)
+                progressDialog = null;
+            progressDialog = new ProgressDialog(context);
+            progressDialog.setTitle("Please wait, while product updates");
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+        }
     }
 
     @Override
@@ -57,6 +75,8 @@ public class ProductsUpdateTask extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected void onPostExecute(Void aVoid) {
+        if (progressDialog.isShowing())
+            progressDialog.dismiss();
         if (isCompleteSuccessfully)
             MainActivity.bus.post(resultList);
     }

@@ -372,7 +372,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 Toast.makeText(MainActivity.this, "Selected product: " + product.getTitle(), Toast.LENGTH_SHORT).show();
                 idForUpdate = product.getId();
                 List<ProductItem> itemsForUpdate = Arrays.asList(product);
-                new ProductsUpdateTask(itemsForUpdate, productsFile, storeFile, getApplicationContext()).execute();
+                new ProductsUpdateTask(itemsForUpdate, productsFile, storeFile, true ,getApplicationContext()).execute();
                 break;
         }
         return super.onContextItemSelected(item);

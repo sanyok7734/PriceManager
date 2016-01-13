@@ -35,9 +35,14 @@ public class ProductRetrievingTask extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected Void doInBackground(Void... params) {
-        Log.d("Madness", "Starting asynctask");
-        retriever.retrieveWebPage();
-        Log.d("Madness", "Finishing asynctask");
+        try {
+            Log.d("Madness", "Starting asynctask");
+            retriever.retrieveWebPage();
+            Log.d("Madness", "Finishing asynctask");
+        } catch (Exception e) {
+            e.printStackTrace();
+            cancel(true);
+        }
         return null;
     }
 
