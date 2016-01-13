@@ -23,9 +23,9 @@ public class ProductsUpdateTask extends AsyncTask<Void, Void, Void> {
     private Context context;
     private boolean isCompleteSuccessfully = true;
 
-    public ProductsUpdateTask(File productsFile, File storesFile, Context context) {
+    public ProductsUpdateTask(List<ProductItem> itemsForUpdate, File productsFile, File storesFile, Context context) {
         ProductStorageJsonImpl productStorage = new ProductStorageJsonImpl(productsFile);
-        this.products = productStorage.getItemsList();
+        this.products = itemsForUpdate == null ? productStorage.getItemsList() : itemsForUpdate;
         this.storesFile = storesFile;
         this.context = context;
     }

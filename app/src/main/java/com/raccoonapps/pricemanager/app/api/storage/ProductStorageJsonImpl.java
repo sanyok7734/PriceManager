@@ -51,7 +51,7 @@ public class ProductStorageJsonImpl implements Storage<ProductItem> {
             int itemIndex = SimpleOperations.INSTANCE.getItemIndex(id, productsArray);
             List<ProductItem> productsList = getItemsList();
             productsList.remove(itemIndex);
-            productsList.add(to);
+            productsList.add(itemIndex, to);
             productsJSON.remove(PRODUCTS_ARRAY);
             productsArray = convertToJSONArray(productsList);
             productsJSON.put(PRODUCTS_ARRAY, productsArray);

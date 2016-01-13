@@ -47,10 +47,12 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+@SuppressWarnings("All")
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
     public static final String TAG = "MADNESS";
@@ -58,7 +60,6 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     public static final String STORE_FILE = "store.json";
     public static final String PRODUCTS_FILE = "products.json";
-    public static final String URL_ROZETKA = "http://soft.rozetka.com.ua/cod_black_ops_3_ps3/p3921461/";
 
     private RecyclerView listProduct;
     private AdapterPriceList adapterPriceList;
@@ -81,6 +82,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     private List<Tag> priceId = new ArrayList<>();
 
     private AdapterDialog adapterDialog;
+
+    private UUID idForUpdate;
 
     private String currentUrl;
 
@@ -266,7 +269,6 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                         SimpleOperations.INSTANCE.writeJSONToFile(storeStorage.getStoresJson().toString(), storeFile);
                         ProductItem productItem = new ProductItem(UUID.randomUUID(), store.getId(), getInfo(titleId, titleClass).get(0), getInfo(priceClass, priceId).get(0), currentUrl, LocalDateTime.now());
                         adapterPriceList.addItem(productItem);
-                        //Toast.makeText(MainActivity.this, "" + getInfo(titleId, titleClass).get(2) + " ----- " + getInfo(priceClass, priceId).get(2), Toast.LENGTH_SHORT).show();
                         ProductStorageJsonImpl productStorage = new ProductStorageJsonImpl(productsFile);
                         productStorage.addItem(productItem);
                         SimpleOperations.INSTANCE.writeJSONToFile(productStorage.getProductsJSON().toString(), productsFile);
@@ -357,7 +359,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         ProductStorageJsonImpl productStorage = new ProductStorageJsonImpl(productsFile);
         switch (item.getItemId()) {
             case 0:
-                Toast.makeText(MainActivity.this, "change", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Change", Toast.LENGTH_SHORT).show();
                 break;
             case 1:
                 Toast.makeText(MainActivity.this, "Delete product " + product.getTitle(), Toast.LENGTH_SHORT).show();
@@ -367,6 +369,10 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 break;
             case 2:
                 // TODO update selected product
+                Toast.makeText(MainActivity.this, "Selected product: " + product.getTitle(), Toast.LENGTH_SHORT).show();
+                idForUpdate = product.getId();
+                List<ProductItem> itemsForUpdate = Arrays.asList(product);
+                new ProductsUpdateTask(itemsForUpdate, productsFile, storeFile, getApplicationContext()).execute();
                 break;
         }
         return super.onContextItemSelected(item);
@@ -391,19 +397,15 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     private void openInBrowser(UUID uuid) {
         ProductItem product = new ProductStorageJsonImpl(productsFile).get(uuid);
-        if (product != null) {
-            Log.d(TAG, "Selected product: " + product.getTitle());
+        if (product != null)
             startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(product.getLink())));
-        }
-        else
-            Log.d(TAG, "Selected null product " + uuid);
     }
 
     @Override
     public void onRefresh() {
         if (SimpleOperations.INSTANCE.isNetworkAvailable(getApplicationContext())) {
             swipeRefreshLayout.setRefreshing(true);
-            new ProductsUpdateTask(productsFile, storeFile, getApplicationContext()).execute();
+            new ProductsUpdateTask(null, productsFile, storeFile, getApplicationContext()).execute();
         } else {
             swipeRefreshLayout.setRefreshing(false);
             Toast.makeText(MainActivity.this, "No WiFi connection available", Toast.LENGTH_SHORT).show();
@@ -413,11 +415,24 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     @Subscribe
     public void refreshList(ArrayList<ProductItem> items) {
         swipeRefreshLayout.setRefreshing(false);
+        Log.d(TAG, "In refreshList");
         if (!items.isEmpty()) {
             ProductStorageJsonImpl productStorage = new ProductStorageJsonImpl(productsFile);
-            productStorage.updateItemsList(items);
-            SimpleOperations.INSTANCE.writeJSONToFile(productStorage.getProductsJSON().toString(), productsFile);
-            updatePriceListAdapter(items);
+            if (items.size() > 1) {
+                Log.d(TAG, "1");
+                productStorage.updateItemsList(items);
+                SimpleOperations.INSTANCE.writeJSONToFile(productStorage.getProductsJSON().toString(), productsFile);
+                updatePriceListAdapter(items);
+            } else if (items.size() == 1) {
+                Log.d(TAG, "2");
+                ProductItem updatedItem = items.get(0);
+                updatedItem.setId(idForUpdate);
+                productStorage.updateItem(idForUpdate, updatedItem);
+                SimpleOperations.INSTANCE.writeJSONToFile(productStorage.getProductsJSON().toString(), productsFile);
+                updatePriceListAdapter(productStorage.getItemsList());
+                for (ProductItem item : productStorage.getItemsList())
+                    Log.d(TAG, item.getLastUpdate() + "");
+            }
         } else {
             Toast.makeText(MainActivity.this, "Error occurred while updating", Toast.LENGTH_SHORT).show();
         }
@@ -425,14 +440,12 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     @Override
     protected void onPause() {
-        //startService(new Intent(getBaseContext(), ProductsUpdatingService.class));
         super.onPause();
     }
 
     @Override
     protected void onDestroy() {
         bus.unregister(MainActivity.this);
-        //startService(new Intent(getBaseContext(), ProductsUpdatingService.class));
         super.onDestroy();
     }
 

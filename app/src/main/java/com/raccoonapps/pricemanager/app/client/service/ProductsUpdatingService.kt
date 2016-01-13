@@ -8,18 +8,12 @@ import com.raccoonapps.pricemanager.app.api.model.SimpleOperations
 import com.raccoonapps.pricemanager.app.api.retriever.ProductRetrieverImpl
 import com.raccoonapps.pricemanager.app.api.storage.ProductStorageJsonImpl
 import java.io.File
-import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 class ProductsUpdatingService : Service() {
 
     private val TAG = "Service_madness"
-    private val interval: Long = 30000
-
-    private val timer: Timer by lazy {
-        Timer()
-    }
 
     private val productsFile: File by lazy {
         File("${applicationContext.getExternalFilesDir(null)}/products.json")
@@ -28,8 +22,6 @@ class ProductsUpdatingService : Service() {
     private val storesFile: File by lazy {
         File("${applicationContext.getExternalFilesDir(null)}/store.json")
     }
-
-    private var tTask: TimerTask? = null
 
     override fun onCreate() {
         super.onCreate()
