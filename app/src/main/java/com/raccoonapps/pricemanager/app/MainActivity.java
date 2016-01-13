@@ -368,11 +368,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 SimpleOperations.INSTANCE.writeJSONToFile(productStorage.getProductsJSON().toString(), productsFile);
                 break;
             case 2:
-                // TODO update selected product
-                Toast.makeText(MainActivity.this, "Selected product: " + product.getTitle(), Toast.LENGTH_SHORT).show();
                 idForUpdate = product.getId();
                 List<ProductItem> itemsForUpdate = Arrays.asList(product);
-                new ProductsUpdateTask(itemsForUpdate, productsFile, storeFile, true ,getApplicationContext()).execute();
+                new ProductsUpdateTask(itemsForUpdate, productsFile, storeFile, true, MainActivity.this).execute();
                 break;
         }
         return super.onContextItemSelected(item);
@@ -405,7 +403,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     public void onRefresh() {
         if (SimpleOperations.INSTANCE.isNetworkAvailable(getApplicationContext())) {
             swipeRefreshLayout.setRefreshing(true);
-            new ProductsUpdateTask(null, productsFile, storeFile, getApplicationContext()).execute();
+            new ProductsUpdateTask(null, productsFile, storeFile, false, getApplicationContext()).execute();
         } else {
             swipeRefreshLayout.setRefreshing(false);
             Toast.makeText(MainActivity.this, "No WiFi connection available", Toast.LENGTH_SHORT).show();

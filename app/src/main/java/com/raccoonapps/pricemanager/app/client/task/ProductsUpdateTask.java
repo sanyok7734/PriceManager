@@ -51,6 +51,7 @@ public class ProductsUpdateTask extends AsyncTask<Void, Void, Void> {
     @Override
     protected Void doInBackground(Void... params) {
         resultList = new ArrayList<>();
+        Log.d("MADNESS", "Products size: " + products.size());
         try {
             for (ProductItem product : products) {
                 if (SimpleOperations.INSTANCE.isNetworkAvailable(context)) {
@@ -75,7 +76,7 @@ public class ProductsUpdateTask extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected void onPostExecute(Void aVoid) {
-        if (progressDialog.isShowing())
+        if  (progressDialog != null && progressDialog.isShowing())
             progressDialog.dismiss();
         if (isCompleteSuccessfully)
             MainActivity.bus.post(resultList);
