@@ -15,6 +15,9 @@ import com.raccoonapps.pricemanager.app.api.model.ProductItem;
 
 import java.util.List;
 
+/**
+ * Adapter for products list in MainActivity
+ * */
 public class AdapterPriceList extends RecyclerView.Adapter<AdapterPriceList.ViewHolder> {
 
     List<ProductItem> products;
@@ -48,6 +51,7 @@ public class AdapterPriceList extends RecyclerView.Adapter<AdapterPriceList.View
         holder.item.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
+                // Event bus posts event to MainActivity for handling context menu call
                 MainActivity.bus.post(product);
                 holder.item.showContextMenu();
                 return true;
@@ -65,7 +69,6 @@ public class AdapterPriceList extends RecyclerView.Adapter<AdapterPriceList.View
         notifyDataSetChanged();
     }
 
-    @SuppressWarnings("all")
     class ViewHolder extends RecyclerView.ViewHolder {
 
         TextView title;

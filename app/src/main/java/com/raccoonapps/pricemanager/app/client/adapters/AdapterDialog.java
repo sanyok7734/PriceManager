@@ -14,6 +14,9 @@ import com.raccoonapps.pricemanager.app.client.model.Tag;
 
 import java.util.List;
 
+/**
+ * Adapter for lists in AlertDialog. This adapter fills list and provides functionality to select listElement
+ * */
 public class AdapterDialog extends SelectableAdapter<AdapterDialog.ViewHolder>{
 
 

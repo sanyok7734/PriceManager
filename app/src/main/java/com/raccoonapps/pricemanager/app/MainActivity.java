@@ -145,6 +145,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         }
     }
 
+    /**
+     * Shows dialog for link adding
+     * */
     private void showDialogAddURL() {
         infoProduct = new ArrayList<>();
         final MaterialEditText materialEditText = new MaterialEditText(this);
@@ -176,6 +179,10 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         builder.show();
     }
 
+    /**
+     * Subscriber, that cathces events from {@link ProductRetrievingTask},
+     * when page is loaded
+     * */
     @Subscribe
     public void startDialog(Boolean value) {
         ProductRetrieverImpl retriever = mainTask.getRetriever();
@@ -207,6 +214,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         }
     }
 
+    /**
+     * Shows dialog for selecting title and price tags
+     * */
     private void showDialogTitle(List<Tag> tags, String name, final String tag) {
         RecyclerView recyclerView = new RecyclerView(this);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -349,9 +359,6 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     public boolean onContextItemSelected(MenuItem item) {
         ProductStorageJsonImpl productStorage = new ProductStorageJsonImpl(productsFile);
         switch (item.getItemId()) {
-           /* case 0:
-                Toast.makeText(MainActivity.this, "change", Toast.LENGTH_SHORT).show();
-                break;*/
             case 1:
                 Toast.makeText(MainActivity.this, "Delete product " + product.getTitle(), Toast.LENGTH_SHORT).show();
                 productStorage.deleteItem(product.getId());

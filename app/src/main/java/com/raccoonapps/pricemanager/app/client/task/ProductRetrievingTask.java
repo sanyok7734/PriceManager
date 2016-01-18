@@ -7,6 +7,9 @@ import android.os.AsyncTask;
 import com.raccoonapps.pricemanager.app.MainActivity;
 import com.raccoonapps.pricemanager.app.api.retriever.ProductRetrieverImpl;
 
+/**
+ * Task, for retrieving new product
+ * */
 public class ProductRetrievingTask extends AsyncTask<Void, Void, Void> {
 
     ProgressDialog progressDialog;
@@ -17,6 +20,10 @@ public class ProductRetrievingTask extends AsyncTask<Void, Void, Void> {
 
     private boolean isDone = false;
 
+    /**
+     * @param context Context of activity, that starts this task,
+     * @param retriever Retriever, that we used to load product
+     * */
     public ProductRetrievingTask(Context context, ProductRetrieverImpl retriever) {
         this.retriever = retriever;
         this.context = context;

@@ -3,7 +3,6 @@ package com.raccoonapps.pricemanager.app.client.task;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.raccoonapps.pricemanager.app.MainActivity;
 import com.raccoonapps.pricemanager.app.api.model.ProductItem;
@@ -15,6 +14,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Task for updating single or multiple products
+ * */
 public class ProductsUpdateTask extends AsyncTask<Void, Void, Void> {
 
     private List<ProductItem> products;
@@ -27,6 +29,12 @@ public class ProductsUpdateTask extends AsyncTask<Void, Void, Void> {
     private boolean isCompleteSuccessfully = true;
     private boolean blockUI;
 
+    /**
+     * @param itemsForUpdate Products, which we want update.
+     * @param productsFile File, which stores products.
+     * @param storesFile File, which stores shops.
+     * @param blockUI if true, than UI will be blocked by progressDialog
+     * */
     public ProductsUpdateTask(List<ProductItem> itemsForUpdate, File productsFile, File storesFile, boolean blockUI, Context context) {
         ProductStorageJsonImpl productStorage = new ProductStorageJsonImpl(productsFile);
         this.products = itemsForUpdate == null ? productStorage.getItemsList() : itemsForUpdate;
