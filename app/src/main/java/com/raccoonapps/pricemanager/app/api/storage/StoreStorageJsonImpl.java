@@ -1,6 +1,7 @@
 package com.raccoonapps.pricemanager.app.api.storage;
 
 import com.raccoonapps.pricemanager.app.api.model.JSONStoreFields;
+import com.raccoonapps.pricemanager.app.api.model.SimpleOperations;
 import com.raccoonapps.pricemanager.app.api.model.Store;
 
 import org.json.JSONArray;
@@ -11,8 +12,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import com.raccoonapps.pricemanager.app.api.model.SimpleOperations;
 
 public class StoreStorageJsonImpl implements Storage<Store> {
 
@@ -120,7 +119,7 @@ public class StoreStorageJsonImpl implements Storage<Store> {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return new ArrayList<Store>();
+        return new ArrayList<>();
     }
 
     public JSONObject getStoresJson() {

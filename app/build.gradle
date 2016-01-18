@@ -11,6 +11,8 @@ android {
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -36,6 +38,12 @@ dependencies {
     compile 'joda-time:joda-time:2.3'
     compile 'org.jsoup:jsoup:1.7.2'
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile 'com.android.support:support-annotations:23.1.1'
+
+    // Testing-only dependencies
+    androidTestCompile 'com.android.support:support-annotations:23.1.1'
+    androidTestCompile 'com.android.support.test:runner:0.4.1'
+    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.1'
 }
 buildscript {
     ext.kotlin_version = '1.0.0-beta-4584'

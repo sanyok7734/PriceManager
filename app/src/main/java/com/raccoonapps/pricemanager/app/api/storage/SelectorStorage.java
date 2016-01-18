@@ -1,7 +1,9 @@
 package com.raccoonapps.pricemanager.app.api.storage;
 
+/**
+ * Class, which stores selectors for certain shop {@link com.raccoonapps.pricemanager.app.api.model.Selector}
+ * */
 public class SelectorStorage {
-
 
     private String titleSelector;
 

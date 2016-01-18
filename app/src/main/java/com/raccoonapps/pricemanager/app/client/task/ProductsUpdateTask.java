@@ -51,7 +51,6 @@ public class ProductsUpdateTask extends AsyncTask<Void, Void, Void> {
     @Override
     protected Void doInBackground(Void... params) {
         resultList = new ArrayList<>();
-        Log.d("MADNESS", "Products size: " + products.size());
         try {
             for (ProductItem product : products) {
                 if (SimpleOperations.INSTANCE.isNetworkAvailable(context)) {
@@ -59,7 +58,6 @@ public class ProductsUpdateTask extends AsyncTask<Void, Void, Void> {
                     ProductRetrieverImpl retriever = new ProductRetrieverImpl(link);
                     retriever.retrieveWebPage();
                     ProductItem item = retriever.tryRetrieveExistingValues(storesFile);
-                    Log.d("Madness", "Retrieved: " + item.getTitle() + ". Last update: " + item.getLastUpdate());
                     resultList.add(item);
                 } else {
                     isCompleteSuccessfully = false;
@@ -68,7 +66,6 @@ public class ProductsUpdateTask extends AsyncTask<Void, Void, Void> {
             }
         } catch (Exception e) {
             isCompleteSuccessfully = false;
-            Log.d("Async", "Exception catches");
             cancel(true);
         }
         return null;

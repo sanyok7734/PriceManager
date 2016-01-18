@@ -37,8 +37,6 @@ public class ProductRetrieverImpl implements ProductRetriever {
 
     private Document document;
 
-    private Selector selector = Selector.ID;
-
     public ProductRetrieverImpl(String url) {
         this.url = url;
     }
@@ -76,6 +74,10 @@ public class ProductRetrieverImpl implements ProductRetriever {
         }
     }
 
+    /**
+     * @param selector {@link Selector}, can be id or class
+     * @return List of items, selected by selector
+     * */
     public Map<String, String> getBySelector(Selector selector) {
         Elements selectedElements = document.select(selector.getSelectorType());
         return fillBySelectorType(selector, selectedElements);
@@ -86,6 +88,9 @@ public class ProductRetrieverImpl implements ProductRetriever {
         return fillBySelectorType(selector, selectedElements).get(key);
     }
 
+    /**
+     * Trying find store with existing name. If store exists, we can already add product
+     * */
     public ProductItem tryRetrieveExistingValues(File storesFile) {
         Store store = checkIfStoreExists(storesFile);
         if (store != null) {

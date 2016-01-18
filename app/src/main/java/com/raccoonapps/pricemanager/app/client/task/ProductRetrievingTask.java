@@ -3,7 +3,6 @@ package com.raccoonapps.pricemanager.app.client.task;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.raccoonapps.pricemanager.app.MainActivity;
 import com.raccoonapps.pricemanager.app.api.retriever.ProductRetrieverImpl;
@@ -36,9 +35,7 @@ public class ProductRetrievingTask extends AsyncTask<Void, Void, Void> {
     @Override
     protected Void doInBackground(Void... params) {
         try {
-            Log.d("Madness", "Starting asynctask");
             retriever.retrieveWebPage();
-            Log.d("Madness", "Finishing asynctask");
         } catch (Exception e) {
             e.printStackTrace();
             cancel(true);

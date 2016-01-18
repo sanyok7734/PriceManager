@@ -7,12 +7,21 @@ import org.json.JSONObject;
 
 import java.util.UUID;
 
+/**
+ * Object representation of store
+ * */
 public class Store {
 
+    /**
+     * Unique store identifier
+     * */
     private UUID id;
 
     private String storeName;
 
+    /**
+     *  @see {@link SelectorStorage}
+     * */
     private SelectorStorage selectorStorage;
 
     public Store(UUID id, String storeName, SelectorStorage selectorStorage) {

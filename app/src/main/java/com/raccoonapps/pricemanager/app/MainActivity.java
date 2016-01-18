@@ -13,7 +13,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -39,9 +38,7 @@ import com.rey.material.widget.Switch;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
-import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
-import org.joda.time.format.DateTimeFormat;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -55,7 +52,6 @@ import java.util.UUID;
 @SuppressWarnings("All")
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
-    public static final String TAG = "MADNESS";
     public static Bus bus = new Bus();
 
     public static final String STORE_FILE = "store.json";
@@ -94,38 +90,34 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (LocalDate.now().compareTo(LocalDate.parse("19.01.2016", DateTimeFormat.forPattern("DD.MM.YYYY"))) < 0) {
-            Log.d(TAG, "Now is " + LocalDate.now());
-            setContentView(R.layout.activity_main);
-            bus.register(MainActivity.this);
+        setContentView(R.layout.activity_main);
+        bus.register(MainActivity.this);
 
-            //stopService(new Intent(getBaseContext(), ProductsUpdatingService.class));
-            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-            setSupportActionBar(toolbar);
+        //stopService(new Intent(getBaseContext(), ProductsUpdatingService.class));
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-            initializeAppDirectory();
-            List<ProductItem> loadedList = loadProductsListFromJSON();
-            swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.refresh);
-            swipeRefreshLayout.setOnRefreshListener(this);
-            swipeRefreshLayout.setColorSchemeResources(R.color.blue, R.color.green, R.color.yellow, R.color.red);
+        initializeAppDirectory();
+        List<ProductItem> loadedList = loadProductsListFromJSON();
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.refresh);
+        swipeRefreshLayout.setOnRefreshListener(this);
+        swipeRefreshLayout.setColorSchemeResources(R.color.blue, R.color.green, R.color.yellow, R.color.red);
 
 
-            listProduct = (RecyclerView) findViewById(R.id.list_product);
+        listProduct = (RecyclerView) findViewById(R.id.list_product);
 
-            adapterPriceList = new AdapterPriceList(loadedList, getApplicationContext());
-            linearLayoutManager = new LinearLayoutManager(getApplicationContext());
-            listProduct.setLayoutManager(linearLayoutManager);
-            listProduct.setAdapter(adapterPriceList);
+        adapterPriceList = new AdapterPriceList(loadedList, getApplicationContext());
+        linearLayoutManager = new LinearLayoutManager(getApplicationContext());
+        listProduct.setLayoutManager(linearLayoutManager);
+        listProduct.setAdapter(adapterPriceList);
 
-            FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-            fab.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    showDialogAddURL();
-                }
-            });
-        } else
-            Log.d(TAG, "Date doesn't match");
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showDialogAddURL();
+            }
+        });
     }
 
     private List<ProductItem> loadProductsListFromJSON() {
@@ -147,7 +139,6 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             if (!productsFile.exists()) {
                 productsFile.createNewFile();
                 SimpleOperations.INSTANCE.writeJSONToFile(new JSONObject().toString(), productsFile);
-
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -413,23 +404,18 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     @Subscribe
     public void refreshList(ArrayList<ProductItem> items) {
         swipeRefreshLayout.setRefreshing(false);
-        Log.d(TAG, "In refreshList");
         if (!items.isEmpty()) {
             ProductStorageJsonImpl productStorage = new ProductStorageJsonImpl(productsFile);
             if (items.size() > 1) {
-                Log.d(TAG, "1");
                 productStorage.updateItemsList(items);
                 SimpleOperations.INSTANCE.writeJSONToFile(productStorage.getProductsJSON().toString(), productsFile);
                 updatePriceListAdapter(items);
             } else if (items.size() == 1) {
-                Log.d(TAG, "2");
                 ProductItem updatedItem = items.get(0);
                 updatedItem.setId(idForUpdate);
                 productStorage.updateItem(idForUpdate, updatedItem);
                 SimpleOperations.INSTANCE.writeJSONToFile(productStorage.getProductsJSON().toString(), productsFile);
                 updatePriceListAdapter(productStorage.getItemsList());
-                for (ProductItem item : productStorage.getItemsList())
-                    Log.d(TAG, item.getLastUpdate() + "");
             }
         } else {
             Toast.makeText(MainActivity.this, "Error occurred while updating", Toast.LENGTH_SHORT).show();

@@ -6,18 +6,36 @@ import org.json.JSONObject;
 
 import java.util.UUID;
 
+/**
+ * Product object representation
+ * */
 public class ProductItem {
 
+    /**
+     * Product unique identifier
+     * */
     private UUID id;
 
+    /**
+     * Identifier of store object, which associated with this product
+     * */
     private UUID storeId;
 
+    /**
+     * Product title
+     * */
     private String title;
 
     private String price;
 
+    /**
+     * Link of the product web page
+     * */
     private String link;
 
+    /**
+     * Last time product updates
+     * */
     private LocalDateTime lastUpdate;
 
     public ProductItem(UUID id, UUID storeId, String title, String price, String link, LocalDateTime lastUpdate) {

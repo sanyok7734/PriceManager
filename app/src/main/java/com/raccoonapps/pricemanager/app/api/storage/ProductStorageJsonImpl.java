@@ -13,12 +13,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Product storage implementation
+ * */
 public class ProductStorageJsonImpl implements Storage<ProductItem> {
 
     public static final String PRODUCTS_ARRAY = "products";
 
     private JSONObject productsJSON;
 
+    /**
+     * @param productsFile File, which contains products JSONObject
+     * */
     public ProductStorageJsonImpl(File productsFile) {
         try {
             productsJSON = new JSONObject(SimpleOperations.INSTANCE.loadJSONFromFile(productsFile));
@@ -31,9 +37,8 @@ public class ProductStorageJsonImpl implements Storage<ProductItem> {
 
     @Override
     public boolean addItem(ProductItem productItem) {
-        JSONArray products = null;
         try {
-            products = productsJSON.getJSONArray(PRODUCTS_ARRAY);
+            JSONArray products = productsJSON.getJSONArray(PRODUCTS_ARRAY);
             products.put(productItem.toJSONObject());
             productsJSON.remove(PRODUCTS_ARRAY);
             productsJSON.put(PRODUCTS_ARRAY, products);
@@ -60,6 +65,11 @@ public class ProductStorageJsonImpl implements Storage<ProductItem> {
         }
     }
 
+    /**
+     * Converts provided List into JSONArray representation
+     * @param productsList List, which need to convert;
+     * @return Converted JSONArray
+     * */
     private JSONArray convertToJSONArray(List<ProductItem> productsList) {
         JSONArray array = new JSONArray();
         for (ProductItem item : productsList) {
@@ -118,6 +128,9 @@ public class ProductStorageJsonImpl implements Storage<ProductItem> {
         return new ArrayList<>();
     }
 
+    /**
+     * Updates current productsJsonArray
+     * */
     public void updateItemsList(List<ProductItem> newProducts) {
         try {
             List<ProductItem> items = getItemsList();

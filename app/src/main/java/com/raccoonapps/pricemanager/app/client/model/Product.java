@@ -1,8 +1,5 @@
 package com.raccoonapps.pricemanager.app.client.model;
 
-/**
- * Created by sanyok on 03.01.16.
- */
 public class Product {
     private String title;
     private String price;

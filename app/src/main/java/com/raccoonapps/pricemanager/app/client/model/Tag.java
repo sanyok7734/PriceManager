@@ -2,9 +2,6 @@ package com.raccoonapps.pricemanager.app.client.model;
 
 import android.graphics.Color;
 
-/**
- * Created by sanyok on 06.01.16.
- */
 public class Tag {
 
     private String id;
